@@ -5,11 +5,6 @@ import java.util.Date;
 import com.liv.domain.Modalidade;
 import com.liv.domain.Status;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
 public class ProcessoCessandoDTO {
 	
 	private String nome;
@@ -36,7 +31,69 @@ public class ProcessoCessandoDTO {
 		this.dataConcessao = dataConcessao;
 		this.cessacao = cessacao;
 	}
-	
-	
+
+	public String getNome() {
+		return nome;
+	}
+
+	public void setNome(String nome) {
+		this.nome = nome;
+	}
+
+	public String getCpf() {
+		return cpf;
+	}
+
+	public void setCpf(String cpf) {
+		this.cpf = cpf;
+	}
+
+	public String getTelefone() {
+		return telefone;
+	}
+
+	public void setTelefone(String telefone) {
+		this.telefone = telefone;
+	}
+
+	public String getNumeroProtocolo() {
+		return numeroProtocolo;
+	}
+
+	public void setNumeroProtocolo(String numeroProtocolo) {
+		this.numeroProtocolo = numeroProtocolo;
+	}
+
+	public Status getStatus() {
+		return status;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
+	public Modalidade getBeneficio() {
+		return beneficio;
+	}
+
+	public void setBeneficio(Modalidade beneficio) {
+		this.beneficio = beneficio;
+	}
+
+	public Date getDataConcessao() {
+		return dataConcessao;
+	}
+
+	public void setDataConcessao(Date dataConcessao) {
+		this.dataConcessao = dataConcessao;
+	}
+
+	public Date getCessacao() {
+		return cessacao;
+	}
+
+	public void setCessacao(Date cessacao) {
+		this.cessacao = cessacao;
+	}
 
 }

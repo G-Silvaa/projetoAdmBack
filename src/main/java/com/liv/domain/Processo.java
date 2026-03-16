@@ -35,13 +35,6 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@Getter
-@Setter
-@NoArgsConstructor
 @Entity
 @Table(name = "processos", uniqueConstraints = {
 		@UniqueConstraint(name = "processos_uk_numero_protocolo", columnNames = "numero_protocolo")
@@ -517,6 +510,137 @@ public class Processo {
 	private String formatarData(Date data) {
 	    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy 'às' HH:mm");
 	    return dateFormat.format(data);
+	}
+
+	public Processo() {
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getNumeroProtocolo() {
+		return numeroProtocolo;
+	}
+
+	public void setNumeroProtocolo(String numeroProtocolo) {
+		this.numeroProtocolo = numeroProtocolo;
+	}
+
+	public Status getStatus() {
+		return status;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
+	public String getDocumentosPendentes() {
+		return documentosPendentes;
+	}
+
+	public void setDocumentosPendentes(String documentosPendentes) {
+		this.documentosPendentes = documentosPendentes;
+	}
+
+	public Contrato getContrato() {
+		return contrato;
+	}
+
+	public void setContrato(Contrato contrato) {
+		this.contrato = contrato;
+	}
+
+	public Date getPericiaMedica() {
+		return periciaMedica;
+	}
+
+	public void setPericiaMedica(Date periciaMedica) {
+		this.periciaMedica = periciaMedica;
+	}
+
+	public String getEnderecoPericiaMedica() {
+		return enderecoPericiaMedica;
+	}
+
+	public void setEnderecoPericiaMedica(String enderecoPericiaMedica) {
+		this.enderecoPericiaMedica = enderecoPericiaMedica;
+	}
+
+	public Date getAvaliacaoSocial() {
+		return avaliacaoSocial;
+	}
+
+	public void setAvaliacaoSocial(Date avaliacaoSocial) {
+		this.avaliacaoSocial = avaliacaoSocial;
+	}
+
+	public String getEnderecoAvaliacaoSocial() {
+		return enderecoAvaliacaoSocial;
+	}
+
+	public void setEnderecoAvaliacaoSocial(String enderecoAvaliacaoSocial) {
+		this.enderecoAvaliacaoSocial = enderecoAvaliacaoSocial;
+	}
+
+	public Date getEntradaDoProtocolo() {
+		return entradaDoProtocolo;
+	}
+
+	public void setEntradaDoProtocolo(Date entradaDoProtocolo) {
+		this.entradaDoProtocolo = entradaDoProtocolo;
+	}
+
+	public Date getDataConcessao() {
+		return dataConcessao;
+	}
+
+	public void setDataConcessao(Date dataConcessao) {
+		this.dataConcessao = dataConcessao;
+	}
+
+	public Date getCessacao() {
+		return cessacao;
+	}
+
+	public void setCessacao(Date cessacao) {
+		this.cessacao = cessacao;
+	}
+
+	public BigDecimal getValorConcedido() {
+		return valorConcedido;
+	}
+
+	public void setValorConcedido(BigDecimal valorConcedido) {
+		this.valorConcedido = valorConcedido;
+	}
+
+	public Date getDataCriacao() {
+		return dataCriacao;
+	}
+
+	public void setDataCriacao(Date dataCriacao) {
+		this.dataCriacao = dataCriacao;
+	}
+
+	public Date getUltimaAtualizacao() {
+		return ultimaAtualizacao;
+	}
+
+	public void setUltimaAtualizacao(Date ultimaAtualizacao) {
+		this.ultimaAtualizacao = ultimaAtualizacao;
+	}
+
+	public IRepository getRepository() {
+		return repository;
+	}
+
+	public void setRepository(IRepository repository) {
+		this.repository = repository;
 	}
 
 }

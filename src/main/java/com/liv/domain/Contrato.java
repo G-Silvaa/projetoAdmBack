@@ -40,13 +40,6 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@Setter
-@Getter
-@NoArgsConstructor
 @Entity
 @Table(name = "contratos", uniqueConstraints = {
 		@UniqueConstraint(name = "contratos_uk_numero", columnNames = "numero")
@@ -391,5 +384,80 @@ public class Contrato {
             throw new IllegalArgumentException("CPF inválido. Deve ter 11 dígitos.");
         }
     }
+
+	public Contrato() {
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Cliente getCliente() {
+		return cliente;
+	}
+
+	public void setCliente(Cliente cliente) {
+		this.cliente = cliente;
+	}
+
+	public String getNumero() {
+		return numero;
+	}
+
+	public void setNumero(String numero) {
+		this.numero = numero;
+	}
+
+	public String getIndicacao() {
+		return indicacao;
+	}
+
+	public void setIndicacao(String indicacao) {
+		this.indicacao = indicacao;
+	}
+
+	public BigDecimal getValor() {
+		return valor;
+	}
+
+	public void setValor(BigDecimal valor) {
+		this.valor = valor;
+	}
+
+	public Modalidade getBeneficio() {
+		return beneficio;
+	}
+
+	public void setBeneficio(Modalidade beneficio) {
+		this.beneficio = beneficio;
+	}
+
+	public Date getInicio() {
+		return inicio;
+	}
+
+	public void setInicio(Date inicio) {
+		this.inicio = inicio;
+	}
+
+	public Date getConclusao() {
+		return conclusao;
+	}
+
+	public void setConclusao(Date conclusao) {
+		this.conclusao = conclusao;
+	}
+
+	public IRepository getRepository() {
+		return repository;
+	}
+
+	public void setRepository(IRepository repository) {
+		this.repository = repository;
+	}
 
 }

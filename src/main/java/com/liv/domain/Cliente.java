@@ -28,13 +28,6 @@ import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@Setter
-@Getter
-@NoArgsConstructor
 @Entity
 @Table(name = "clientes", uniqueConstraints = {
 		@UniqueConstraint(name = "clientes_uk_cpf", columnNames = "cpf")
@@ -109,5 +102,72 @@ public class Cliente {
 	@Inject
 	@Transient
 	private IRepository repository;
+
+	public Cliente() {
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Contato getContato() {
+		return contato;
+	}
+
+	public void setContato(Contato contato) {
+		this.contato = contato;
+	}
+
+	public String getCpf() {
+		return cpf;
+	}
+
+	public void setCpf(String cpf) {
+		this.cpf = cpf;
+	}
+
+	public String getRg() {
+		return rg;
+	}
+
+	public void setRg(String rg) {
+		this.rg = rg;
+	}
+
+	public Date getNascimento() {
+		return nascimento;
+	}
+
+	public void setNascimento(Date nascimento) {
+		this.nascimento = nascimento;
+	}
+
+	public Endereco getEndereco() {
+		return endereco;
+	}
+
+	public void setEndereco(Endereco endereco) {
+		this.endereco = endereco;
+	}
+
+	public Representante getRepresentante() {
+		return representante;
+	}
+
+	public void setRepresentante(Representante representante) {
+		this.representante = representante;
+	}
+
+	public IRepository getRepository() {
+		return repository;
+	}
+
+	public void setRepository(IRepository repository) {
+		this.repository = repository;
+	}
 
 }

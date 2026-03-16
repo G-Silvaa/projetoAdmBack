@@ -26,11 +26,6 @@ import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
 @Entity
 @Immutable
 @Table(name = "vw_relatorios")
@@ -186,5 +181,69 @@ public class Relatorio {
                         throw new RuntimeException(e);
                 }
         }
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Integer getAno() {
+		return ano;
+	}
+
+	public void setAno(Integer ano) {
+		this.ano = ano;
+	}
+
+	public Mes getMes() {
+		return mes;
+	}
+
+	public void setMes(Mes mes) {
+		this.mes = mes;
+	}
+
+	public Integer getTotalContratos() {
+		return totalContratos;
+	}
+
+	public void setTotalContratos(Integer totalContratos) {
+		this.totalContratos = totalContratos;
+	}
+
+	public Integer getTotalBeneficiosConcedidos() {
+		return totalBeneficiosConcedidos;
+	}
+
+	public void setTotalBeneficiosConcedidos(Integer totalBeneficiosConcedidos) {
+		this.totalBeneficiosConcedidos = totalBeneficiosConcedidos;
+	}
+
+	public Integer getTotalBeneficiosAguardando() {
+		return totalBeneficiosAguardando;
+	}
+
+	public void setTotalBeneficiosAguardando(Integer totalBeneficiosAguardando) {
+		this.totalBeneficiosAguardando = totalBeneficiosAguardando;
+	}
+
+	public Integer getDadoEntrada() {
+		return dadoEntrada;
+	}
+
+	public void setDadoEntrada(Integer dadoEntrada) {
+		this.dadoEntrada = dadoEntrada;
+	}
+
+	public IRepository getRepository() {
+		return repository;
+	}
+
+	public void setRepository(IRepository repository) {
+		this.repository = repository;
+	}
 
 }

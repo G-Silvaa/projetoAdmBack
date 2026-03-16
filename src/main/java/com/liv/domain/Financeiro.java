@@ -38,13 +38,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@Getter
-@Setter
-@NoArgsConstructor
 @Entity
 @Table(name = "financeiros")
 public class Financeiro {
@@ -236,6 +229,113 @@ public class Financeiro {
 				"CE");
 
 		return boleto;
+	}
+
+	public Financeiro() {
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Contrato getContrato() {
+		return contrato;
+	}
+
+	public void setContrato(Contrato contrato) {
+		this.contrato = contrato;
+	}
+
+	public Integer getParcelasRestantes() {
+		return parcelasRestantes;
+	}
+
+	public void setParcelasRestantes(Integer parcelasRestantes) {
+		this.parcelasRestantes = parcelasRestantes;
+	}
+
+	public Integer getParcelasPagas() {
+		return parcelasPagas;
+	}
+
+	public void setParcelasPagas(Integer parcelasPagas) {
+		this.parcelasPagas = parcelasPagas;
+	}
+
+	public BigDecimal getValorProximaParcela() {
+		return valorProximaParcela;
+	}
+
+	public void setValorProximaParcela(BigDecimal valorProximaParcela) {
+		this.valorProximaParcela = valorProximaParcela;
+	}
+
+	public BigDecimal getMontantePago() {
+		return montantePago;
+	}
+
+	public void setMontantePago(BigDecimal montantePago) {
+		this.montantePago = montantePago;
+	}
+
+	public Integer getNumeroSolicitacaoPagamento() {
+		return numeroSolicitacaoPagamento;
+	}
+
+	public void setNumeroSolicitacaoPagamento(Integer numeroSolicitacaoPagamento) {
+		this.numeroSolicitacaoPagamento = numeroSolicitacaoPagamento;
+	}
+
+	public Date getDataPagamentoParcela() {
+		return dataPagamentoParcela;
+	}
+
+	public void setDataPagamentoParcela(Date dataPagamentoParcela) {
+		this.dataPagamentoParcela = dataPagamentoParcela;
+	}
+
+	public BigDecimal getValorPagoDaParcela() {
+		return valorPagoDaParcela;
+	}
+
+	public void setValorPagoDaParcela(BigDecimal valorPagoDaParcela) {
+		this.valorPagoDaParcela = valorPagoDaParcela;
+	}
+
+	public BigDecimal getValorTotalPagar() {
+		return valorTotalPagar;
+	}
+
+	public void setValorTotalPagar(BigDecimal valorTotalPagar) {
+		this.valorTotalPagar = valorTotalPagar;
+	}
+
+	public String getSituacaoParcela() {
+		return situacaoParcela;
+	}
+
+	public void setSituacaoParcela(String situacaoParcela) {
+		this.situacaoParcela = situacaoParcela;
+	}
+
+	public Boolean getSituacaoPagamento() {
+		return situacaoPagamento;
+	}
+
+	public void setSituacaoPagamento(Boolean situacaoPagamento) {
+		this.situacaoPagamento = situacaoPagamento;
+	}
+
+	public IRepository getRepository() {
+		return repository;
+	}
+
+	public void setRepository(IRepository repository) {
+		this.repository = repository;
 	}
 
 }
