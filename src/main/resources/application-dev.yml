@@ -1,0 +1,27 @@
+spring:
+  server:
+    port: 8080
+  datasource:
+    url: jdbc:postgresql://localhost/liv
+    username: postgres
+    password: Merd@1234
+  jpa:
+    hibernate:      
+      ddl-auto: none
+    show-sql: true     
+    properties.hibernate:      
+      default_schema: liv
+      connection.charSet: UTF-8      
+      jdbc.lob.non_contextual_creation: true
+      format_sql: true
+      hbm2ddl.import_files_sql_extractor: org.hibernate.tool.schema.internal.script.MultiLineSqlScriptExtractor
+    #properties.jakarta.persistence.schema-generation.scripts:
+    #  action: create
+    #  create-target: create.sql
+    #  create-source: metadata
+  jackson:
+    deserialization.fail-on-unknown-properties: true
+    deserialization.fail-on-ignored-properties: false
+  logging:
+    level.org.springframework: TRACE 
+    
