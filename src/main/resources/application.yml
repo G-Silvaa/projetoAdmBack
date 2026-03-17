@@ -42,3 +42,7 @@ springdoc:
     path: /swagger-ui.html
 server:
   servlet.context-path: /liv-api
+app:
+  auth:
+    jwt-secret: ${APP_JWT_SECRET:liv-api-jwt-secret-longa-o-suficiente-para-hmac-256-e-rotacao}
+    jwt-expiration-ms: ${APP_JWT_EXPIRATION_MS:28800000}
