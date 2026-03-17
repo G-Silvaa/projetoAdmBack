@@ -4,7 +4,9 @@ public enum NivelUsuario {
 
 	ADMINISTRADOR("Administrador"),
 	GESTOR("Gestor"),
-	OPERADOR("Operador");
+	OPERADOR("Operador"),
+	FINANCEIRO("Financeiro"),
+	CONSULTA("Consulta");
 
 	private final String label;
 

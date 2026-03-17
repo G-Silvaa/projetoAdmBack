@@ -2,15 +2,18 @@ package com.liv.api.security;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.liv.domain.NivelUsuario;
 import com.liv.domain.Usuario;
 import com.liv.domain.UsuarioService;
 
@@ -36,9 +39,152 @@ public class AuthFilter extends OncePerRequestFilter {
 			"/api-docs"
 	);
 
-	private static final List<String> ADMIN_ONLY_PREFIXES = List.of(
-			"/usuarios",
-			"/domain/usuario"
+	private static final List<AccessRule> ACCESS_RULES = List.of(
+			new AccessRule(
+					List.of("/usuarios", "/domain/usuario"),
+					List.of(),
+					List.of(),
+					List.of(NivelUsuario.ADMINISTRADOR)
+			),
+			new AccessRule(
+					List.of("/dashboard", "/processo", "/domain/relatorio", "/domain/service/relatorio-service"),
+					List.of(),
+					List.of(HttpMethod.GET, HttpMethod.POST, HttpMethod.PATCH),
+					List.of(
+							NivelUsuario.ADMINISTRADOR,
+							NivelUsuario.GESTOR,
+							NivelUsuario.OPERADOR,
+							NivelUsuario.FINANCEIRO,
+							NivelUsuario.CONSULTA
+					)
+			),
+			new AccessRule(
+					List.of("/domain/cliente"),
+					List.of(),
+					List.of(HttpMethod.GET),
+					List.of(
+							NivelUsuario.ADMINISTRADOR,
+							NivelUsuario.GESTOR,
+							NivelUsuario.OPERADOR,
+							NivelUsuario.CONSULTA
+					)
+			),
+			new AccessRule(
+					List.of("/domain/cliente"),
+					List.of(),
+					List.of(HttpMethod.POST, HttpMethod.PATCH, HttpMethod.DELETE),
+					List.of(
+							NivelUsuario.ADMINISTRADOR,
+							NivelUsuario.GESTOR,
+							NivelUsuario.OPERADOR
+					)
+			),
+			new AccessRule(
+					List.of("/domain/processo"),
+					List.of(),
+					List.of(HttpMethod.GET),
+					List.of(
+							NivelUsuario.ADMINISTRADOR,
+							NivelUsuario.GESTOR,
+							NivelUsuario.OPERADOR,
+							NivelUsuario.CONSULTA
+					)
+			),
+			new AccessRule(
+					List.of("/domain/processo"),
+					List.of(),
+					List.of(HttpMethod.POST, HttpMethod.PATCH, HttpMethod.DELETE),
+					List.of(
+							NivelUsuario.ADMINISTRADOR,
+							NivelUsuario.GESTOR,
+							NivelUsuario.OPERADOR
+					)
+			),
+			new AccessRule(
+					List.of("/domain/contrato/"),
+					List.of("/gerar-contrato"),
+					List.of(HttpMethod.PATCH),
+					List.of(
+							NivelUsuario.ADMINISTRADOR,
+							NivelUsuario.GESTOR,
+							NivelUsuario.OPERADOR,
+							NivelUsuario.FINANCEIRO,
+							NivelUsuario.CONSULTA
+					)
+			),
+			new AccessRule(
+					List.of("/domain/contrato"),
+					List.of(),
+					List.of(HttpMethod.GET),
+					List.of(
+							NivelUsuario.ADMINISTRADOR,
+							NivelUsuario.GESTOR,
+							NivelUsuario.OPERADOR,
+							NivelUsuario.FINANCEIRO,
+							NivelUsuario.CONSULTA
+					)
+			),
+			new AccessRule(
+					List.of("/domain/contrato/"),
+					List.of("/renovar"),
+					List.of(HttpMethod.PATCH),
+					List.of(
+							NivelUsuario.ADMINISTRADOR,
+							NivelUsuario.GESTOR,
+							NivelUsuario.OPERADOR
+					)
+			),
+			new AccessRule(
+					List.of("/domain/contrato"),
+					List.of(),
+					List.of(HttpMethod.POST, HttpMethod.DELETE),
+					List.of(
+							NivelUsuario.ADMINISTRADOR,
+							NivelUsuario.GESTOR,
+							NivelUsuario.OPERADOR
+					)
+			),
+			new AccessRule(
+					List.of("/domain/contrato"),
+					List.of(),
+					List.of(HttpMethod.PATCH),
+					List.of(
+							NivelUsuario.ADMINISTRADOR,
+							NivelUsuario.GESTOR,
+							NivelUsuario.OPERADOR
+					)
+			),
+			new AccessRule(
+					List.of("/domain/financeiro"),
+					List.of(),
+					List.of(HttpMethod.GET),
+					List.of(
+							NivelUsuario.ADMINISTRADOR,
+							NivelUsuario.GESTOR,
+							NivelUsuario.FINANCEIRO,
+							NivelUsuario.CONSULTA
+					)
+			),
+			new AccessRule(
+					List.of("/domain/financeiro/"),
+					List.of("/boleto", "/comprovante"),
+					List.of(HttpMethod.PATCH),
+					List.of(
+							NivelUsuario.ADMINISTRADOR,
+							NivelUsuario.GESTOR,
+							NivelUsuario.FINANCEIRO
+					)
+			),
+			new AccessRule(
+					List.of("/domain/financeiro"),
+					List.of(),
+					List.of(HttpMethod.PATCH),
+					List.of(
+							NivelUsuario.ADMINISTRADOR,
+							NivelUsuario.GESTOR,
+							NivelUsuario.FINANCEIRO
+					)
+			)
 	);
 
 	private final JwtService jwtService;
@@ -76,8 +222,8 @@ public class AuthFilter extends OncePerRequestFilter {
 			Usuario usuario = usuarioService.getUsuarioAtivo(payload.userId());
 			AuthenticatedUser authenticatedUser = AuthenticatedUser.fromEntity(usuario);
 
-			if (isAdminOnly(path) && !authenticatedUser.isAdmin()) {
-				writeError(response, HttpStatus.FORBIDDEN, "Acesso permitido apenas para administradores.");
+			if (!isAuthorized(path, request.getMethod(), authenticatedUser)) {
+				writeError(response, HttpStatus.FORBIDDEN, "Seu perfil não tem permissão para esta operação.");
 				return;
 			}
 
@@ -96,8 +242,12 @@ public class AuthFilter extends OncePerRequestFilter {
 		return PUBLIC_PATHS.contains(path) || PUBLIC_PREFIXES.stream().anyMatch(path::startsWith);
 	}
 
-	private boolean isAdminOnly(String path) {
-		return ADMIN_ONLY_PREFIXES.stream().anyMatch(path::startsWith);
+	private boolean isAuthorized(String path, String method, AuthenticatedUser authenticatedUser) {
+		Optional<AccessRule> rule = ACCESS_RULES.stream()
+				.filter(accessRule -> accessRule.matches(path, method))
+				.findFirst();
+
+		return rule.map(accessRule -> accessRule.allows(authenticatedUser.nivel())).orElse(true);
 	}
 
 	private String getPath(HttpServletRequest request) {
