@@ -3,10 +3,10 @@ package com.liv.domain;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 import javax.util.ddd.annotation.Create;
@@ -145,166 +145,218 @@ public class Contrato {
 	// PATCH /liv-api/domain/contrato/{id}/gerar-contrato
 	public Object[] gerarContrato() {
 		Report report = new Report();
-		
+		report.setPageHeight(842f);
+		report.setPageWidth(595f);
+
+		// Header em todas as páginas
+		report.addHeaderGrid().setBorder(Borders.None)
+				.addRow()
+				.addValue("LIV ASSESSORIA PREVIDENCIÁRIA").setFontBold().setFontSize(9).sethAlignLeft()
+				.addValue("Contrato Nº " + numero).setFontSize(9).sethAlignRight();
+
+		// Footer com dados da empresa + nº do contrato
+		report.addFooterGrid().setBorder(Borders.None)
+				.addRow()
+				.addValue("LIV Assessoria Previdenciária LTDA · CNPJ 48.994.154/0001-72").setFontSize(7).sethAlignLeft()
+				.addValue("Av. 4 de julho, 387 · Jereissati II · Maracanaú/CE").setFontSize(7).sethAlignRight();
+
+		// Título principal
 		report.addGrid().setBorder(Borders.None)
-		.addRow()
-		.addValue("CONTRATO\n"
-				+ "Prestação de Serviços\n"
-				+ "Previdenciário").setFontSize(20).setPaddings(0, 0, 0, 15f)
-		.addRow()
-		.addValue("\nContratante").setFontSize(14).setPaddings(0, 0, 0, 30f);
-		
-		if(cliente.getRepresentante() == null) {
-			report.addGrid().setBorder(Borders.None)
-			.addRow()
-			.addValue(cliente.getContato().getNome().toUpperCase() + ", brasileiro(a), do lar, portador(a) do CPF de N. " +
-					formatarCPF(cliente.getCpf()) + ", com contato de N. " + formatarTelefone(cliente.getContato().getTelefone()) + ", "
-							+ "residente e domiciliado(a) no endereço " + cliente.getEndereco().toString() + ".").setPaddings(0, 15f, 0, 60f).sethAlignJustified().setFontSize(12);
-		} else {
-			String complemento = cliente.getContato().getNome().toUpperCase() + ",";
-			
-			if(calcularIdade(cliente.getNascimento()) < 18) {
-				complemento = complemento.concat(" menor,"); 
-			}
-			
-			report.addGrid().setBorder(Borders.None)
-			.addRow()
-			.addValue(complemento + " portador(a) do CPF de N. " + formatarCPF(cliente.getCpf()) + ", neste ato representado(a) por " + cliente.getRepresentante().getContato().getNome().toUpperCase() + ", "
-					+ "brasileiro(a), do lar, portador(a) do CPF de N. " + formatarCPF(cliente.getRepresentante().getCpf()) + ", com contato de N. " + 
-					formatarTelefone(cliente.getRepresentante().getContato().getTelefone()) + ", " + "residente e domiciliado(a) no endereço " 
-					+ cliente.getEndereco().toString() + ".").setPaddings(0, 15f, 0, 60f).sethAlignJustified().setFontSize(12);
-		}
-		
+				.addRow()
+				.addValue("CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE ASSESSORIA PREVIDENCIÁRIA")
+				.setFontBold().setFontSize(14).sethAlignCenter().setPaddings(0, 0, 20f, 0);
+
+		// Contratante
 		report.addGrid().setBorder(Borders.None)
-		.addRow()
-		.addValue("\n\nContratado").setFontSize(14).setPaddings(0, 0, 0, 30f)
-		.addRow()
-		.addValue("LIV Assessoria Previdenciária LTDA, portadora do CNPJ de N. 48.994.154/0001-72, com sede no endereço "
-				+ "Av. 4 de julho N. 387, Jereissati II, Maracanaú/CE, com contato de N. (85) 9 8628-5349, "
-				+ "e-mail: liv.assessoria.previdenciaria@outlook.com.").setPaddings(0, 15f, 0, 60f).sethAlignJustified().setFontSize(12)
-		.addRow()
-		.addValue("\n\nAs partes acima identificadas têm, entre si, justo e acertado o presente Contrato de Prestação de Serviços de "
-				+ "Assessoria Previdenciária, que se regerá pelas cláusulas seguintes e pelas condições descritas no presente.").setPaddings(0, 15f, 0, 30f).sethAlignJustified().setFontSize(12)
-		.addRow()
-		.addValue("\n1. Objeto do contrato").setFontSize(14).setPaddings(0, 0, 0, 30f)
-		.addRow()
-		.addValue("1.1. Cláusula 1ª. O presente contrato tem como OBJETO, a prestação, pelo CONTRATADO, de serviços "
-				+ "de assessoria ao CONTRATANTE, em seu estabelecimento comercial, localizado no município de Maracanaú no Estado "
-				+ "do Ceará.").setPaddings(0, 15f, 0, 40f).sethAlignJustified().setFontSize(12)
-		.addRow()
-		.addValue("\n2. Valor e forma de pagamento").setFontSize(14).setPaddings(0, 0, 0, 30f)
-		.addRow()
-		.addValue("2.1. Cláusula 2ª. O presente serviço, consistirá em assessoria previdenciária na modalidade "
-				+ beneficio.getModalidade() + "benefício de " + beneficio.getDescricao() + ". Com o valor a ser cobrado "
-				+ "na importância de R$ " + valor + ". Pago após a implementação do benefício. Caso não haja valores retroativos "
-				+ "do valor integral do contrato, será cobrado um valor de entrada de 70% sobre o valor que sair, o restante "
-				+ "vindo com parcelas fixas de R$ 600,00 pagos conforme a data de recebimento do beneficiário. Sendo assim, "
-				+ "efetuando pagamento em espécie, PIX, TED ou boleto bancário.").setPaddings(0, 15f, 0, 40f).sethAlignJustified().setFontSize(12)
-		.addRow()
-		.addValue("PIX: (85) 9 9958-2811. (Banco Itaú)").setPaddings(0, 0, 0, 40f).setFontSize(12)
-		.addRow()
-		.addValue("TRANSFERÊNCIA BANCÁRIA: Itaú Unibanco (341) / Agência: 7979 / Conta: 54046-0.").setPaddings(0, 0, 0, 40f).setFontSize(12)
-		.addRow()
-		.addValue("ESPÉCIE: No próprio escritório.").setPaddings(0, 0, 0, 40f).setFontSize(12)
-		.addRow()
-		.addValue("2.2. Cláusula 2ª. Este contrato tem força de titulo executivo e vale como protesto extra judicial.").setPaddings(0, 15f, 0, 40f).setFontSize(12)
-		.addRow()
-		.addValue("2.3. Cláusula 2ª. O acesso ao MEU INSS será restaurado, o requerente só terá acesso após o deferimento.").setPaddings(0, 15f, 0, 40f).setFontSize(12)
-		.addRow()
-		.addValue("\n3. Vigência e Rescisão").setFontSize(14).setPaddings(0, 0, 0, 30f)
-		.addRow()
-		.addValue("3.1. O presente contrato inicia na data de sua assinatura em Maracanaú/CE, " + new SimpleDateFormat("dd/MM/yyyy").format(inicio) + " e "
-				+ "terminará após o deferimento declarado pelo INSS (Instituto Nacional de Seguro Social). Em caso de rescisão antecipada "
-				+ "por parte do CONTRATANTE, será cobrado multa no valor de 50% (cinquenta por cento) do valor de contratação do serviço. "
-				+ "Conforme está na cláusula 2ª em 2.1.").setPaddings(0, 15f, 0, 30f).sethAlignJustified().setFontSize(12)
-		.addRow()
-		.addValue("\n\n4. Obrigações das").setFontSize(14).setPaddings(0, 0, 0, 30f);
-		
+				.addRow()
+				.addValue("CONTRATANTE").setFontBold().setFontSize(11).setPaddings(0, 0, 6f, 0);
+
 		report.addGrid().setBorder(Borders.None)
-		.addColumn()
-		.addColumn()
-		.addValue("partes Contratantes").setFontSize(14).setPaddings(0, 0, 0, 50f)
-		.addValue("Contratado").setFontSize(14).setPaddings(0, 0, 0, 50f)
-		.addRow()
-		.addValue("Efetuar o pagamento no prazo e conforme combinados;").setPaddings(0, 30f, 0, 80f).sethAlignJustified().setFontSize(12)
-		.addValue("Executar os serviços previstos neste contrato;").setPaddings(0, 30f, 0, 80f).sethAlignJustified().setFontSize(12)
-		.addRow()
-		.addValue("Oferecer as informações necessárias para que o contratado possa executar os serviços previstos neste contrato.").setPaddings(20, 30f, 0, 80f).setVAlignTop().sethAlignJustified().setFontSize(12)
-		.addValue("Manter a confidencialidade das informações fornecidas pela contratante.").setPaddings(20, 30f, 0, 80f).setVAlignTop().sethAlignJustified().setFontSize(12);
-		
+				.addRow()
+				.addValue(montarParagrafoContratante())
+				.setFontSize(10).sethAlignJustified().setPaddings(0, 0, 14f, 0);
+
+		// Contratado
 		report.addGrid().setBorder(Borders.None)
-		.addRow()
-		.addValue("\n\n5. Obrigações da contratada").setFontSize(14).setPaddings(0, 0, 0, 30f)
-		.addRow()
-		.addValue("5.1. A CONTRATADA se obriga a acompanhar todos os atos relacionados com o serviço de assessoria descrito na cláusula 2ª, executando "
-				+ "tarefas necessárias para solução de problemas, de forma preventiva ou paliativa, nos moldes dos parágrafos seguintes.").setPaddings(0, 15f, 0, 40f).sethAlignJustified().setFontSize(12)
-		.addRow()
-		.addValue("5.2. Parágrafo primeiro. A CONTRATADA se obriga a utilizar técnicas condizentes com o serviço de assessoria a ser prestado "
-				+ ", utilizando-se de todos os esforços para a sua consecução.").setPaddings(0, 15f, 0, 40f).sethAlignJustified().setFontSize(12)
-		.addRow()
-		.addValue("5.3. Parágrafo segundo. A CONTRATADA utilizará de todo o seu corpo técnico para a realização de pesquisa "
-				+ "e desenvolvimento na área assessorada, bem como para a solução e prevenção de eventuais problemas, nomeando "
-				+ "um responsável para a administração das atividades.").setPaddings(0, 15f, 0, 40f).sethAlignJustified().setFontSize(12)
-		.addRow()
-		.addValue("\n\n\n");
-		
-		LayoutGrid grid = report.addGrid();
-		
-		grid.setBorder(Borders.None)
-		.addColumn()
-		.addColumn()
-		.addRow()
-		.addValue("\n\n")
-		.addValue()
-		.addRow()
-		.addValue("___________________________________________").setPaddings(0, 15f, 0, 30f).sethAlignCenter()
-		.addValue("___________________________________________").setPaddings(0, 15f, 0, 30f).sethAlignCenter();
-		
-		if(cliente.getRepresentante() == null) {
-			grid.addRow()
-			.addValue(cliente.getContato().getNome().toUpperCase()).setFontSize(8).sethAlignCenter()
-			.addValue("LIV ASSESSORIA PREVIDENCIÁRIA").setFontSize(8).sethAlignCenter()
-			.addRow()
-			.addValue("CPF: " + formatarCPF(cliente.getCpf())).setFontSize(8).sethAlignCenter()
-			.addValue("48.994.154/0001-72").setFontSize(8).sethAlignCenter();
-		} else {
-			grid.addRow()
-			.addValue(cliente.getRepresentante().getContato().getNome().toUpperCase()).setFontSize(8).sethAlignCenter()
-			.addValue("LIV ASSESSORIA PREVIDENCIÁRIA").setFontSize(8).sethAlignCenter()
-			.addRow()
-			.addValue("CPF: " + formatarCPF(cliente.getRepresentante().getCpf())).setFontSize(8).sethAlignCenter()
-			.addValue("48.994.154/0001-72").setFontSize(8).sethAlignCenter();
-		}
-		
-		grid.addRow()
-		.addValue("\n\n\n")
-		.addValue()
-		.addRow()
-		.addValue("___________________________________________").sethAlignCenter()
-		.addValue("___________________________________________").sethAlignCenter()
-		.addRow()
-		.addValue("TESTEMUNHA 1").setFontSize(8).sethAlignCenter()
-		.addValue("TESTEMUNHA 2").setFontSize(8).sethAlignCenter();
-		
+				.addRow()
+				.addValue("CONTRATADO").setFontBold().setFontSize(11).setPaddings(0, 0, 6f, 0);
+
 		report.addGrid().setBorder(Borders.None)
-		.addRow()
-		.addValue("\n\nMaracanaú/CE, " + new SimpleDateFormat("dd/MM/yyyy").format(inicio)).setFontSize(7).sethAlignCenter()
-		.addRow()
-		.addValue("LIV Assessoria Previdenciária LTDA,").setFontSize(7).sethAlignCenter()
-		.addRow()
-		.addValue("48.994.154/0001-72").setFontSize(7).sethAlignCenter()
-		.addRow()
-		.addValue("Av. 4 de julho n. 387, Jereissati I, Maracanaú/CE.").setFontSize(7).sethAlignCenter()
-		.addRow()
-		.addValue("Contrato de N. " + numero).setFontSize(7).sethAlignCenter();
+				.addRow()
+				.addValue("LIV Assessoria Previdenciária LTDA, pessoa jurídica de direito privado, "
+						+ "portadora do CNPJ nº 48.994.154/0001-72, com sede na Av. 4 de julho nº 387, "
+						+ "Jereissati II, Maracanaú/CE, contato (85) 9 8628-5349, "
+						+ "e-mail liv.assessoria.previdenciaria@outlook.com.")
+				.setFontSize(10).sethAlignJustified().setPaddings(0, 0, 14f, 0);
+
+		// Preâmbulo
+		report.addGrid().setBorder(Borders.None)
+				.addRow()
+				.addValue("As partes acima identificadas têm, entre si, justo e acertado o presente Contrato "
+						+ "de Prestação de Serviços de Assessoria Previdenciária, que se regerá pelas cláusulas "
+						+ "seguintes e pelas condições descritas no presente instrumento.")
+				.setFontSize(10).sethAlignJustified().setPaddings(0, 0, 20f, 0);
+
+		// Cláusula 1
+		clausula(report, "1. Objeto do contrato",
+				"1.1. O presente contrato tem como objeto a prestação, pelo CONTRATADO, de serviços de "
+						+ "assessoria previdenciária ao CONTRATANTE, no município de Maracanaú/CE.");
+
+		// Cláusula 2
+		clausula(report, "2. Valor e forma de pagamento",
+				"2.1. O serviço consistirá em assessoria previdenciária na modalidade "
+						+ beneficio.getModalidade() + " (" + beneficio.getDescricao() + "). O valor "
+						+ "ajustado é de " + formatarMoeda(valor) + ", pago após a implementação do benefício. "
+						+ "Caso não haja valores retroativos, será cobrado valor de entrada de 70% sobre o "
+						+ "valor recebido, com saldo em parcelas fixas de R$ 600,00 conforme a data de "
+						+ "recebimento do beneficiário. Aceitos pagamento em espécie, PIX, TED ou boleto bancário.");
+
+		// Tabela de formas de pagamento
+		report.addGrid().setBorder(Borders.None)
+				.addColumn().setWidth(0.25f)
+				.addColumn()
+				.addRow()
+				.addValue("PIX").setFontBold().setFontSize(9).setPaddings(0, 0, 6f, 0)
+				.addValue("(85) 9 9958-2811 · Banco Itaú").setFontSize(9).setPaddings(0, 0, 6f, 0)
+				.addRow()
+				.addValue("Transferência").setFontBold().setFontSize(9).setPaddings(0, 0, 6f, 0)
+				.addValue("Itaú Unibanco (341) · Agência 7979 · Conta 54046-0").setFontSize(9).setPaddings(0, 0, 6f, 0)
+				.addRow()
+				.addValue("Espécie").setFontBold().setFontSize(9).setPaddings(0, 0, 20f, 0)
+				.addValue("Recebido no próprio escritório.").setFontSize(9).setPaddings(0, 0, 20f, 0);
+
+		report.addGrid().setBorder(Borders.None)
+				.addRow()
+				.addValue("2.2. Este contrato tem força de título executivo e vale como protesto extrajudicial.")
+				.setFontSize(10).sethAlignJustified().setPaddings(0, 0, 8f, 0);
+
+		report.addGrid().setBorder(Borders.None)
+				.addRow()
+				.addValue("2.3. O acesso ao MEU INSS será restaurado e o requerente só terá acesso após o deferimento.")
+				.setFontSize(10).sethAlignJustified().setPaddings(0, 0, 16f, 0);
+
+		// Cláusula 3
+		clausula(report, "3. Vigência e Rescisão",
+				"3.1. O presente contrato inicia na data de sua assinatura em Maracanaú/CE, "
+						+ formatarDataPorExtenso(inicio) + ", e terminará após o deferimento declarado "
+						+ "pelo INSS. Em caso de rescisão antecipada por parte do CONTRATANTE, será "
+						+ "cobrada multa no valor de 50% (cinquenta por cento) do valor de contratação "
+						+ "do serviço, conforme cláusula 2.1.");
+
+		// Cláusula 4 - tabela de obrigações
+		report.addGrid().setBorder(Borders.None)
+				.addRow()
+				.addValue("4. Obrigações das partes").setFontBold().setFontSize(11).setPaddings(0, 0, 8f, 0);
+
+		report.addGrid().setBorder(Borders.None)
+				.addColumn("Contratante").setWidth(0.5f)
+				.addColumn("Contratado").setWidth(0.5f)
+				.addRow()
+				.addValue("Efetuar o pagamento no prazo e na forma combinados.").setFontSize(9).sethAlignJustified().setPaddings(0, 8f, 6f, 0).setVAlignTop()
+				.addValue("Executar os serviços previstos neste contrato.").setFontSize(9).sethAlignJustified().setPaddings(0, 0, 6f, 8f).setVAlignTop()
+				.addRow()
+				.addValue("Oferecer as informações necessárias para a execução dos serviços.").setFontSize(9).sethAlignJustified().setPaddings(0, 8f, 14f, 0).setVAlignTop()
+				.addValue("Manter a confidencialidade das informações fornecidas pelo Contratante.").setFontSize(9).sethAlignJustified().setPaddings(0, 0, 14f, 8f).setVAlignTop();
+
+		// Cláusula 5
+		clausula(report, "5. Obrigações da Contratada",
+				"5.1. A CONTRATADA se obriga a acompanhar todos os atos relacionados ao serviço de "
+						+ "assessoria descrito na cláusula 2, executando tarefas necessárias para solução "
+						+ "de problemas, de forma preventiva ou paliativa.");
+
+		report.addGrid().setBorder(Borders.None)
+				.addRow()
+				.addValue("5.2. A CONTRATADA se obriga a utilizar técnicas condizentes com o serviço de "
+						+ "assessoria a ser prestado, utilizando-se de todos os esforços para a sua consecução.")
+				.setFontSize(10).sethAlignJustified().setPaddings(0, 0, 8f, 0);
+
+		report.addGrid().setBorder(Borders.None)
+				.addRow()
+				.addValue("5.3. A CONTRATADA utilizará todo o seu corpo técnico para realização de pesquisa "
+						+ "e desenvolvimento na área assessorada, nomeando um responsável para a administração "
+						+ "das atividades.")
+				.setFontSize(10).sethAlignJustified().setPaddings(0, 0, 24f, 0);
+
+		// Local e data
+		report.addGrid().setBorder(Borders.None)
+				.addRow()
+				.addValue("Maracanaú/CE, " + formatarDataPorExtenso(inicio) + ".")
+				.setFontSize(10).sethAlignRight().setPaddings(0, 0, 36f, 0);
+
+		// Bloco de assinaturas
+		String nomeContratanteAssinatura = cliente.getRepresentante() == null
+				? cliente.getContato().getNome().toUpperCase()
+				: cliente.getRepresentante().getContato().getNome().toUpperCase();
+		String cpfContratanteAssinatura = cliente.getRepresentante() == null
+				? cliente.getCpf()
+				: cliente.getRepresentante().getCpf();
+
+		LayoutGrid assinaturas = report.addGrid().setBorder(Borders.None);
+		assinaturas.addColumn().setWidth(0.5f);
+		assinaturas.addColumn().setWidth(0.5f);
+		assinaturas.addRow()
+				.addValue("____________________________________").sethAlignCenter().setFontSize(9).setPaddings(0, 10f, 4f, 0)
+				.addValue("____________________________________").sethAlignCenter().setFontSize(9).setPaddings(0, 0, 4f, 10f);
+		assinaturas.addRow()
+				.addValue(nomeContratanteAssinatura).sethAlignCenter().setFontBold().setFontSize(8).setPaddings(0, 10f, 2f, 0)
+				.addValue("LIV ASSESSORIA PREVIDENCIÁRIA").sethAlignCenter().setFontBold().setFontSize(8).setPaddings(0, 0, 2f, 10f);
+		assinaturas.addRow()
+				.addValue("CPF " + formatarCPF(cpfContratanteAssinatura)).sethAlignCenter().setFontSize(8).setPaddings(0, 10f, 28f, 0)
+				.addValue("CNPJ 48.994.154/0001-72").sethAlignCenter().setFontSize(8).setPaddings(0, 0, 28f, 10f);
+		assinaturas.addRow()
+				.addValue("____________________________________").sethAlignCenter().setFontSize(9).setPaddings(0, 10f, 4f, 0)
+				.addValue("____________________________________").sethAlignCenter().setFontSize(9).setPaddings(0, 0, 4f, 10f);
+		assinaturas.addRow()
+				.addValue("TESTEMUNHA 1").sethAlignCenter().setFontBold().setFontSize(8).setPaddings(0, 10f, 0, 0)
+				.addValue("TESTEMUNHA 2").sethAlignCenter().setFontBold().setFontSize(8).setPaddings(0, 0, 0, 10f);
 
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 			ReportExporterPDF.exportTo(report, baos);
-			System.out.println(Base64.getEncoder().encodeToString(baos.toByteArray()));
-			return new Object[] { baos.toByteArray(), "contrato-" + cliente.getContato().getNome().replace(" ", "-") + ".pdf" };
+			String filename = "contrato-" + numero + "-"
+					+ cliente.getContato().getNome().replace(" ", "-") + ".pdf";
+			return new Object[] { baos.toByteArray(), filename };
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private void clausula(Report report, String titulo, String texto) {
+		report.addGrid().setBorder(Borders.None)
+				.addRow()
+				.addValue(titulo).setFontBold().setFontSize(11).setPaddings(0, 0, 6f, 0);
+		report.addGrid().setBorder(Borders.None)
+				.addRow()
+				.addValue(texto).setFontSize(10).sethAlignJustified().setPaddings(0, 0, 14f, 0);
+	}
+
+	private String montarParagrafoContratante() {
+		String contratante;
+		if (cliente.getRepresentante() == null) {
+			contratante = cliente.getContato().getNome().toUpperCase()
+					+ ", brasileiro(a), portador(a) do CPF nº " + formatarCPF(cliente.getCpf())
+					+ ", contato (" + formatarTelefone(cliente.getContato().getTelefone()) + ")"
+					+ ", residente e domiciliado(a) no endereço " + cliente.getEndereco().toString() + ".";
+		} else {
+			String menor = calcularIdade(cliente.getNascimento()) < 18 ? ", menor," : ",";
+			contratante = cliente.getContato().getNome().toUpperCase() + menor
+					+ " portador(a) do CPF nº " + formatarCPF(cliente.getCpf())
+					+ ", neste ato representado(a) por "
+					+ cliente.getRepresentante().getContato().getNome().toUpperCase()
+					+ ", brasileiro(a), portador(a) do CPF nº "
+					+ formatarCPF(cliente.getRepresentante().getCpf())
+					+ ", contato (" + formatarTelefone(cliente.getRepresentante().getContato().getTelefone()) + ")"
+					+ ", residente e domiciliado(a) no endereço " + cliente.getEndereco().toString() + ".";
+		}
+		return contratante;
+	}
+
+	private String formatarDataPorExtenso(Date data) {
+		return new SimpleDateFormat("dd 'de' MMMM 'de' yyyy", new Locale("pt", "BR")).format(data);
+	}
+
+	private String formatarMoeda(BigDecimal valor) {
+		if (valor == null) return "R$ 0,00";
+		return String.format(new Locale("pt", "BR"), "R$ %,.2f", valor);
 	}
 	
 	@Update
