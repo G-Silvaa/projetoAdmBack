@@ -26,6 +26,7 @@ import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import org.hibernate.annotations.TenantId;
 @Entity
 @Immutable
 @Table(name = "vw_relatorios")
@@ -37,6 +38,10 @@ public class Relatorio {
 
         @Id
         private Long id;
+
+        @TenantId
+        @Column(name = "empresa_id")
+        private Long empresaId;
 
         @Column(name = "ano")
         private Integer ano;

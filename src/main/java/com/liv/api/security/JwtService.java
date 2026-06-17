@@ -31,6 +31,7 @@ public class JwtService {
 		return Jwts.builder()
 				.subject(usuario.getEmail())
 				.claim("uid", usuario.getId())
+				.claim("eid", usuario.getEmpresaId())
 				.claim("nivel", usuario.getNivel().name())
 				.issuedAt(now)
 				.expiration(new Date(now.getTime() + jwtExpirationMs))
@@ -46,15 +47,16 @@ public class JwtService {
 				.getPayload();
 
 		Long userId = Long.parseLong(String.valueOf(claims.get("uid")));
+		Long empresaId = claims.get("eid") == null ? null : Long.parseLong(String.valueOf(claims.get("eid")));
 		NivelUsuario nivel = NivelUsuario.valueOf(claims.get("nivel", String.class));
 
-		return new JwtPayload(userId, claims.getSubject(), nivel);
+		return new JwtPayload(userId, empresaId, claims.getSubject(), nivel);
 	}
 
 	private SecretKey getSecretKey() {
 		return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
 	}
 
-	public record JwtPayload(Long userId, String email, NivelUsuario nivel) {
+	public record JwtPayload(Long userId, Long empresaId, String email, NivelUsuario nivel) {
 	}
 }

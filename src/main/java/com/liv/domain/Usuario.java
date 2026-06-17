@@ -26,6 +26,11 @@ public class Usuario {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	// Empresa (tenant) a que o usuário pertence. Não é @TenantId porque o login
+	// localiza o usuário por e-mail (global) antes de conhecer o tenant.
+	@Column(name = "empresa_id", nullable = false)
+	private Long empresaId;
+
 	@Column(name = "nome", length = 120, nullable = false)
 	private String nome;
 
@@ -76,6 +81,14 @@ public class Usuario {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Long getEmpresaId() {
+		return empresaId;
+	}
+
+	public void setEmpresaId(Long empresaId) {
+		this.empresaId = empresaId;
 	}
 
 	public String getNome() {

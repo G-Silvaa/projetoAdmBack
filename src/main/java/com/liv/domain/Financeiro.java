@@ -38,6 +38,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import org.hibernate.annotations.TenantId;
 @Entity
 @Table(name = "financeiros")
 public class Financeiro {
@@ -45,6 +46,10 @@ public class Financeiro {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
+	@TenantId
+	@Column(name = "empresa_id", updatable = false)
+	private Long empresaId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "contrato_id", foreignKey = @ForeignKey(name = "financeiro_fk_contrato"))

@@ -1,5 +1,6 @@
 package com.liv.domain;
 
+import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -40,16 +41,21 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.TenantId;
 @Entity
 @Table(name = "contratos", uniqueConstraints = {
-		@UniqueConstraint(name = "contratos_uk_numero", columnNames = "numero")
+		@UniqueConstraint(name = "contratos_uk_empresa_numero", columnNames = { "empresa_id", "numero" })
 })
 public class Contrato {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
+	@TenantId
+	@Column(name = "empresa_id", updatable = false)
+	private Long empresaId;
+
 	@NotNull(message = "Indique o cliente")
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cliente_id", foreignKey = @ForeignKey(name = "contratos_fk_cliente"), nullable = false)
@@ -142,52 +148,111 @@ public class Contrato {
 		repository.add(processo);
 	}
 	
+	// Paleta do contrato (azul-marinho da marca + neutros).
+	private static final Color NAVY = new Color(20, 34, 77);
+	private static final Color LIGHT = new Color(244, 246, 249);
+	private static final Color GRAY = new Color(96, 96, 96);
+	private static final Color WHITE = Color.WHITE;
+
+	public Long getEmpresaId() {
+		return empresaId;
+	}
+
+	/** Faixa de título de seção (fundo azul-marinho, texto branco). */
+	private void secaoHeader(Report report, String titulo) {
+		report.addGrid().setBorder(Borders.None)
+				.addRow()
+				.addValue(titulo).setFontBold().setFontSize(10).setFontColor(WHITE)
+				.setBackgroundColor(NAVY).sethAlignLeft().setPaddings(5f, 8f, 5f, 8f);
+	}
+
+	/** Espaço vertical entre blocos. */
+	private void espaco(Report report, float altura) {
+		report.addGrid().setBorder(Borders.None).addRow()
+				.addValue(" ").setFontSize(2).setPaddings(0, 0, altura, 0);
+	}
+
+	private String nz(String value, String fallback) {
+		return (value == null || value.isBlank()) ? fallback : value;
+	}
+
+	private String montarContatoEmpresa(Empresa empresa) {
+		if (empresa == null) {
+			return "";
+		}
+		StringBuilder sb = new StringBuilder();
+		if (empresa.getTelefone() != null && !empresa.getTelefone().isBlank()) {
+			sb.append("contato ").append(empresa.getTelefone());
+		}
+		if (empresa.getEmail() != null && !empresa.getEmail().isBlank()) {
+			if (sb.length() > 0) {
+				sb.append(", ");
+			}
+			sb.append("e-mail ").append(empresa.getEmail());
+		}
+		return sb.toString();
+	}
+
 	// PATCH /liv-api/domain/contrato/{id}/gerar-contrato
 	public Object[] gerarContrato() {
+		Empresa empresa = repository.get(Empresa.class, this.getEmpresaId()).orElse(null);
+		String empNome = nz(empresa == null ? null : empresa.getNome(), "Assessoria Previdenciária");
+		String empCnpj = nz(empresa == null ? null : empresa.getCnpj(), "—");
+		String empEndereco = nz(empresa == null ? null : empresa.getEndereco(), "—");
+		String empCidade = nz(empresa == null ? null : empresa.getCidade(), "");
+		String empContato = montarContatoEmpresa(empresa);
+
 		Report report = new Report();
 		report.setPageHeight(842f);
 		report.setPageWidth(595f);
+		report.setMargins(44f);
 
-		// Header em todas as páginas
+		// Cabeçalho (faixa da marca) em todas as páginas
 		report.addHeaderGrid().setBorder(Borders.None)
 				.addRow()
-				.addValue("LIV ASSESSORIA PREVIDENCIÁRIA").setFontBold().setFontSize(9).sethAlignLeft()
-				.addValue("Contrato Nº " + numero).setFontSize(9).sethAlignRight();
+				.addValue(empNome.toUpperCase()).setFontBold().setFontSize(10).setFontColor(NAVY)
+						.sethAlignLeft().setBorderBottom(Borders.Solid).setPaddings(0, 0, 6f, 0)
+				.addValue("Contrato Nº " + numero).setFontSize(9).setFontColor(GRAY)
+						.sethAlignRight().setBorderBottom(Borders.Solid).setPaddings(0, 0, 6f, 0);
 
-		// Footer com dados da empresa + nº do contrato
+		// Rodapé com dados da empresa
 		report.addFooterGrid().setBorder(Borders.None)
 				.addRow()
-				.addValue("LIV Assessoria Previdenciária LTDA · CNPJ 48.994.154/0001-72").setFontSize(7).sethAlignLeft()
-				.addValue("Av. 4 de julho, 387 · Jereissati II · Maracanaú/CE").setFontSize(7).sethAlignRight();
+				.addValue(empNome + " · CNPJ " + empCnpj).setFontSize(7).setFontColor(GRAY)
+						.sethAlignLeft().setBorderTop(Borders.Solid).setPaddings(6f, 0, 0, 0)
+				.addValue(empEndereco).setFontSize(7).setFontColor(GRAY)
+						.sethAlignRight().setBorderTop(Borders.Solid).setPaddings(6f, 0, 0, 0);
 
 		// Título principal
 		report.addGrid().setBorder(Borders.None)
 				.addRow()
 				.addValue("CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE ASSESSORIA PREVIDENCIÁRIA")
-				.setFontBold().setFontSize(14).sethAlignCenter().setPaddings(0, 0, 20f, 0);
-
-		// Contratante
+				.setFontBold().setFontSize(15).setFontColor(NAVY).sethAlignCenter().setPaddings(16f, 0, 4f, 0);
 		report.addGrid().setBorder(Borders.None)
 				.addRow()
-				.addValue("CONTRATANTE").setFontBold().setFontSize(11).setPaddings(0, 0, 6f, 0);
+				.addValue("Instrumento particular · Nº " + numero).setFontSize(9).setFontColor(GRAY)
+				.sethAlignCenter().setPaddings(0, 0, 18f, 0);
 
+		// CONTRATANTE
+		secaoHeader(report, "CONTRATANTE");
 		report.addGrid().setBorder(Borders.None)
 				.addRow()
 				.addValue(montarParagrafoContratante())
-				.setFontSize(10).sethAlignJustified().setPaddings(0, 0, 14f, 0);
+				.setFontSize(10).sethAlignJustified().setBackgroundColor(LIGHT)
+				.setPaddings(8f, 10f, 10f, 10f);
+		espaco(report, 8f);
 
-		// Contratado
+		// CONTRATADO
+		secaoHeader(report, "CONTRATADO");
 		report.addGrid().setBorder(Borders.None)
 				.addRow()
-				.addValue("CONTRATADO").setFontBold().setFontSize(11).setPaddings(0, 0, 6f, 0);
-
-		report.addGrid().setBorder(Borders.None)
-				.addRow()
-				.addValue("LIV Assessoria Previdenciária LTDA, pessoa jurídica de direito privado, "
-						+ "portadora do CNPJ nº 48.994.154/0001-72, com sede na Av. 4 de julho nº 387, "
-						+ "Jereissati II, Maracanaú/CE, contato (85) 9 8628-5349, "
-						+ "e-mail liv.assessoria.previdenciaria@outlook.com.")
-				.setFontSize(10).sethAlignJustified().setPaddings(0, 0, 14f, 0);
+				.addValue(empNome + ", pessoa jurídica de direito privado, inscrita no CNPJ nº "
+						+ empCnpj + ", com sede em " + empEndereco
+						+ (empCidade.isBlank() ? "" : ", " + empCidade)
+						+ (empContato.isBlank() ? "" : ", " + empContato) + ".")
+				.setFontSize(10).sethAlignJustified().setBackgroundColor(LIGHT)
+				.setPaddings(8f, 10f, 10f, 10f);
+		espaco(report, 10f);
 
 		// Preâmbulo
 		report.addGrid().setBorder(Borders.None)
@@ -195,12 +260,13 @@ public class Contrato {
 				.addValue("As partes acima identificadas têm, entre si, justo e acertado o presente Contrato "
 						+ "de Prestação de Serviços de Assessoria Previdenciária, que se regerá pelas cláusulas "
 						+ "seguintes e pelas condições descritas no presente instrumento.")
-				.setFontSize(10).sethAlignJustified().setPaddings(0, 0, 20f, 0);
+				.setFontSize(10).sethAlignJustified().setPaddings(0, 0, 18f, 0);
 
 		// Cláusula 1
 		clausula(report, "1. Objeto do contrato",
 				"1.1. O presente contrato tem como objeto a prestação, pelo CONTRATADO, de serviços de "
-						+ "assessoria previdenciária ao CONTRATANTE, no município de Maracanaú/CE.");
+						+ "assessoria previdenciária ao CONTRATANTE"
+						+ (empCidade.isBlank() ? "" : ", no município de " + empCidade) + ".");
 
 		// Cláusula 2
 		clausula(report, "2. Valor e forma de pagamento",
@@ -211,19 +277,26 @@ public class Contrato {
 						+ "valor recebido, com saldo em parcelas fixas de R$ 600,00 conforme a data de "
 						+ "recebimento do beneficiário. Aceitos pagamento em espécie, PIX, TED ou boleto bancário.");
 
-		// Tabela de formas de pagamento
-		report.addGrid().setBorder(Borders.None)
-				.addColumn().setWidth(0.25f)
-				.addColumn()
-				.addRow()
-				.addValue("PIX").setFontBold().setFontSize(9).setPaddings(0, 0, 6f, 0)
-				.addValue("(85) 9 9958-2811 · Banco Itaú").setFontSize(9).setPaddings(0, 0, 6f, 0)
-				.addRow()
-				.addValue("Transferência").setFontBold().setFontSize(9).setPaddings(0, 0, 6f, 0)
-				.addValue("Itaú Unibanco (341) · Agência 7979 · Conta 54046-0").setFontSize(9).setPaddings(0, 0, 6f, 0)
-				.addRow()
-				.addValue("Espécie").setFontBold().setFontSize(9).setPaddings(0, 0, 20f, 0)
-				.addValue("Recebido no próprio escritório.").setFontSize(9).setPaddings(0, 0, 20f, 0);
+		// Tabela de formas de pagamento (dados do escritório)
+		String pix = nz(empresa == null ? null : empresa.getPixChave(), "Informado no ato do pagamento");
+		String banco = nz(empresa == null ? null : empresa.getDadosBancarios(), "Informado no ato do pagamento");
+		espaco(report, 4f);
+		LayoutGrid pagamento = report.addGrid().setBorder(Borders.Solid);
+		pagamento.addColumn().setWidth(0.28f);
+		pagamento.addColumn();
+		pagamento.addRow()
+				.addValue("FORMA").setFontBold().setFontSize(8).setFontColor(WHITE).setBackgroundColor(NAVY).setPaddings(4f, 8f, 4f, 8f)
+				.addValue("DADOS").setFontBold().setFontSize(8).setFontColor(WHITE).setBackgroundColor(NAVY).setPaddings(4f, 8f, 4f, 8f);
+		pagamento.addRow()
+				.addValue("PIX").setFontBold().setFontSize(9).setPaddings(4f, 8f, 4f, 8f)
+				.addValue(pix).setFontSize(9).setPaddings(4f, 8f, 4f, 8f);
+		pagamento.addRow()
+				.addValue("Transferência").setFontBold().setFontSize(9).setBackgroundColor(LIGHT).setPaddings(4f, 8f, 4f, 8f)
+				.addValue(banco).setFontSize(9).setBackgroundColor(LIGHT).setPaddings(4f, 8f, 4f, 8f);
+		pagamento.addRow()
+				.addValue("Espécie").setFontBold().setFontSize(9).setPaddings(4f, 8f, 4f, 8f)
+				.addValue("Recebido no próprio escritório.").setFontSize(9).setPaddings(4f, 8f, 4f, 8f);
+		espaco(report, 14f);
 
 		report.addGrid().setBorder(Borders.None)
 				.addRow()
@@ -237,26 +310,32 @@ public class Contrato {
 
 		// Cláusula 3
 		clausula(report, "3. Vigência e Rescisão",
-				"3.1. O presente contrato inicia na data de sua assinatura em Maracanaú/CE, "
+				"3.1. O presente contrato inicia na data de sua assinatura"
+						+ (empCidade.isBlank() ? ", " : " em " + empCidade + ", ")
 						+ formatarDataPorExtenso(inicio) + ", e terminará após o deferimento declarado "
 						+ "pelo INSS. Em caso de rescisão antecipada por parte do CONTRATANTE, será "
 						+ "cobrada multa no valor de 50% (cinquenta por cento) do valor de contratação "
 						+ "do serviço, conforme cláusula 2.1.");
 
-		// Cláusula 4 - tabela de obrigações
+		// Cláusula 4 - obrigações das partes
 		report.addGrid().setBorder(Borders.None)
 				.addRow()
-				.addValue("4. Obrigações das partes").setFontBold().setFontSize(11).setPaddings(0, 0, 8f, 0);
+				.addValue("4. Obrigações das partes").setFontBold().setFontSize(11).setFontColor(NAVY)
+				.setBorderBottom(Borders.Solid).setPaddings(12f, 0, 8f, 0);
 
-		report.addGrid().setBorder(Borders.None)
-				.addColumn("Contratante").setWidth(0.5f)
-				.addColumn("Contratado").setWidth(0.5f)
-				.addRow()
-				.addValue("Efetuar o pagamento no prazo e na forma combinados.").setFontSize(9).sethAlignJustified().setPaddings(0, 8f, 6f, 0).setVAlignTop()
-				.addValue("Executar os serviços previstos neste contrato.").setFontSize(9).sethAlignJustified().setPaddings(0, 0, 6f, 8f).setVAlignTop()
-				.addRow()
-				.addValue("Oferecer as informações necessárias para a execução dos serviços.").setFontSize(9).sethAlignJustified().setPaddings(0, 8f, 14f, 0).setVAlignTop()
-				.addValue("Manter a confidencialidade das informações fornecidas pelo Contratante.").setFontSize(9).sethAlignJustified().setPaddings(0, 0, 14f, 8f).setVAlignTop();
+		LayoutGrid obrigacoes = report.addGrid().setBorder(Borders.Solid);
+		obrigacoes.addColumn().setWidth(0.5f);
+		obrigacoes.addColumn().setWidth(0.5f);
+		obrigacoes.addRow()
+				.addValue("CONTRATANTE").setFontBold().setFontSize(8).setFontColor(WHITE).setBackgroundColor(NAVY).sethAlignCenter().setPaddings(4f, 8f, 4f, 8f)
+				.addValue("CONTRATADO").setFontBold().setFontSize(8).setFontColor(WHITE).setBackgroundColor(NAVY).sethAlignCenter().setPaddings(4f, 8f, 4f, 8f);
+		obrigacoes.addRow()
+				.addValue("Efetuar o pagamento no prazo e na forma combinados.").setFontSize(9).sethAlignJustified().setVAlignTop().setPaddings(6f, 8f, 6f, 8f)
+				.addValue("Executar os serviços previstos neste contrato.").setFontSize(9).sethAlignJustified().setVAlignTop().setPaddings(6f, 8f, 6f, 8f);
+		obrigacoes.addRow()
+				.addValue("Oferecer as informações necessárias para a execução dos serviços.").setFontSize(9).sethAlignJustified().setVAlignTop().setPaddings(6f, 8f, 6f, 8f)
+				.addValue("Manter a confidencialidade das informações fornecidas pelo Contratante.").setFontSize(9).sethAlignJustified().setVAlignTop().setPaddings(6f, 8f, 6f, 8f);
+		espaco(report, 6f);
 
 		// Cláusula 5
 		clausula(report, "5. Obrigações da Contratada",
@@ -280,7 +359,7 @@ public class Contrato {
 		// Local e data
 		report.addGrid().setBorder(Borders.None)
 				.addRow()
-				.addValue("Maracanaú/CE, " + formatarDataPorExtenso(inicio) + ".")
+				.addValue((empCidade.isBlank() ? "" : empCidade + ", ") + formatarDataPorExtenso(inicio) + ".")
 				.setFontSize(10).sethAlignRight().setPaddings(0, 0, 36f, 0);
 
 		// Bloco de assinaturas
@@ -299,10 +378,10 @@ public class Contrato {
 				.addValue("____________________________________").sethAlignCenter().setFontSize(9).setPaddings(0, 0, 4f, 10f);
 		assinaturas.addRow()
 				.addValue(nomeContratanteAssinatura).sethAlignCenter().setFontBold().setFontSize(8).setPaddings(0, 10f, 2f, 0)
-				.addValue("LIV ASSESSORIA PREVIDENCIÁRIA").sethAlignCenter().setFontBold().setFontSize(8).setPaddings(0, 0, 2f, 10f);
+				.addValue(empNome.toUpperCase()).sethAlignCenter().setFontBold().setFontSize(8).setPaddings(0, 0, 2f, 10f);
 		assinaturas.addRow()
 				.addValue("CPF " + formatarCPF(cpfContratanteAssinatura)).sethAlignCenter().setFontSize(8).setPaddings(0, 10f, 28f, 0)
-				.addValue("CNPJ 48.994.154/0001-72").sethAlignCenter().setFontSize(8).setPaddings(0, 0, 28f, 10f);
+				.addValue("CNPJ " + empCnpj).sethAlignCenter().setFontSize(8).setPaddings(0, 0, 28f, 10f);
 		assinaturas.addRow()
 				.addValue("____________________________________").sethAlignCenter().setFontSize(9).setPaddings(0, 10f, 4f, 0)
 				.addValue("____________________________________").sethAlignCenter().setFontSize(9).setPaddings(0, 0, 4f, 10f);
@@ -323,10 +402,11 @@ public class Contrato {
 	private void clausula(Report report, String titulo, String texto) {
 		report.addGrid().setBorder(Borders.None)
 				.addRow()
-				.addValue(titulo).setFontBold().setFontSize(11).setPaddings(0, 0, 6f, 0);
+				.addValue(titulo).setFontBold().setFontSize(11).setFontColor(NAVY)
+				.setBorderBottom(Borders.Solid).setPaddings(12f, 0, 5f, 0);
 		report.addGrid().setBorder(Borders.None)
 				.addRow()
-				.addValue(texto).setFontSize(10).sethAlignJustified().setPaddings(0, 0, 14f, 0);
+				.addValue(texto).setFontSize(10).sethAlignJustified().setPaddings(0, 0, 12f, 0);
 	}
 
 	private String montarParagrafoContratante() {

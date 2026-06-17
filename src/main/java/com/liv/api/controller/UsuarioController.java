@@ -34,8 +34,8 @@ public class UsuarioController {
 
 	@GetMapping
 	public ResponseEntity<List<UsuarioResponseDTO>> listar(HttpServletRequest request) {
-		AuthContext.requireAdmin(request);
-		return ResponseEntity.ok(usuarioService.listarUsuarios());
+		AuthenticatedUser admin = AuthContext.requireAdmin(request);
+		return ResponseEntity.ok(usuarioService.listarUsuarios(admin.empresaId()));
 	}
 
 	@GetMapping("/niveis")
@@ -49,8 +49,8 @@ public class UsuarioController {
 			@Valid @RequestBody UsuarioCreateRequestDTO request,
 			HttpServletRequest httpServletRequest
 	) {
-		AuthContext.requireAdmin(httpServletRequest);
-		return ResponseEntity.ok(usuarioService.criarUsuario(request));
+		AuthenticatedUser admin = AuthContext.requireAdmin(httpServletRequest);
+		return ResponseEntity.ok(usuarioService.criarUsuario(request, admin.empresaId()));
 	}
 
 	@PatchMapping("/{id}")

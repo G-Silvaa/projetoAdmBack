@@ -19,21 +19,28 @@ import com.liv.api.dto.UsuarioResponseDTO;
 import com.liv.api.dto.UsuarioUpdateRequestDTO;
 import com.liv.api.security.AuthenticatedUser;
 import com.liv.api.security.JwtService;
+import com.liv.infra.repository.EmpresaRepository;
 import com.liv.infra.repository.UsuarioRepository;
 
 @Service
 public class UsuarioService {
 
 	private final UsuarioRepository usuarioRepository;
+	private final EmpresaRepository empresaRepository;
+	private final SubscriptionService subscriptionService;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtService jwtService;
 
 	public UsuarioService(
 			UsuarioRepository usuarioRepository,
+			EmpresaRepository empresaRepository,
+			SubscriptionService subscriptionService,
 			PasswordEncoder passwordEncoder,
 			JwtService jwtService
 	) {
 		this.usuarioRepository = usuarioRepository;
+		this.empresaRepository = empresaRepository;
+		this.subscriptionService = subscriptionService;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtService = jwtService;
 	}
@@ -46,15 +53,27 @@ public class UsuarioService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Já existe um usuário cadastrado com este e-mail.");
 		}
 
+		// Cadastro self-service: cada registro cria um novo escritório (tenant)
+		// e o usuário vira ADMINISTRADOR dele. O isolamento dos dados é por empresa.
+		Empresa empresa = new Empresa();
+		empresa.setNome(normalizeName(request.nome()));
+		empresa.setEmail(email);
+		empresa.setAtivo(true);
+		empresa = empresaRepository.save(empresa);
+
 		Usuario usuario = new Usuario();
+		usuario.setEmpresaId(empresa.getId());
 		usuario.setNome(normalizeName(request.nome()));
 		usuario.setEmail(email);
 		usuario.setSenhaHash(passwordEncoder.encode(request.senha()));
-		usuario.setNivel(usuarioRepository.count() == 0 ? NivelUsuario.ADMINISTRADOR : NivelUsuario.OPERADOR);
+		usuario.setNivel(NivelUsuario.ADMINISTRADOR);
 		usuario.setAtivo(true);
 		usuario.setUltimoAcesso(new Date());
 
 		usuarioRepository.save(usuario);
+
+		// Inicia o período de teste grátis no plano escolhido (ou no padrão).
+		subscriptionService.criarTrial(empresa.getId(), request.planoCodigo());
 
 		return buildAuthResponse(usuario);
 	}
@@ -84,8 +103,8 @@ public class UsuarioService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<UsuarioResponseDTO> listarUsuarios() {
-		return usuarioRepository.findAllByOrderByNomeAsc()
+	public List<UsuarioResponseDTO> listarUsuarios(Long empresaId) {
+		return usuarioRepository.findAllByEmpresaIdOrderByNomeAsc(empresaId)
 				.stream()
 				.map(UsuarioResponseDTO::fromEntity)
 				.toList();
@@ -99,14 +118,18 @@ public class UsuarioService {
 	}
 
 	@Transactional
-	public UsuarioResponseDTO criarUsuario(UsuarioCreateRequestDTO request) {
+	public UsuarioResponseDTO criarUsuario(UsuarioCreateRequestDTO request, Long empresaId) {
 		String email = normalizeEmail(request.email());
 
 		if (usuarioRepository.existsByEmailIgnoreCase(email)) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Já existe um usuário cadastrado com este e-mail.");
 		}
 
+		// Respeita o limite de usuários do plano da empresa.
+		subscriptionService.assertDentroDoLimiteDeUsuarios(empresaId);
+
 		Usuario usuario = new Usuario();
+		usuario.setEmpresaId(empresaId);
 		usuario.setNome(normalizeName(request.nome()));
 		usuario.setEmail(email);
 		usuario.setSenhaHash(passwordEncoder.encode(request.senha()));
@@ -118,7 +141,7 @@ public class UsuarioService {
 
 	@Transactional
 	public UsuarioResponseDTO atualizarUsuario(Long id, UsuarioUpdateRequestDTO request, AuthenticatedUser authenticatedUser) {
-		Usuario usuario = usuarioRepository.findById(id)
+		Usuario usuario = usuarioRepository.findByIdAndEmpresaId(id, authenticatedUser.empresaId())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
 
 		String nome = request.nome() == null || request.nome().isBlank() ? usuario.getNome() : normalizeName(request.nome());
@@ -169,7 +192,8 @@ public class UsuarioService {
 			return;
 		}
 
-		long activeAdmins = usuarioRepository.countByNivelAndAtivoTrue(NivelUsuario.ADMINISTRADOR);
+		long activeAdmins = usuarioRepository.countByEmpresaIdAndNivelAndAtivoTrue(
+				usuario.getEmpresaId(), NivelUsuario.ADMINISTRADOR);
 
 		if (usuario.isAtivo() && activeAdmins <= 1) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "É necessário manter pelo menos um administrador ativo.");

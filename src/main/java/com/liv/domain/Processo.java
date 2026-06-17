@@ -35,15 +35,20 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.TenantId;
 @Entity
 @Table(name = "processos", uniqueConstraints = {
-		@UniqueConstraint(name = "processos_uk_numero_protocolo", columnNames = "numero_protocolo")
+		@UniqueConstraint(name = "processos_uk_empresa_protocolo", columnNames = { "empresa_id", "numero_protocolo" })
 })
 public class Processo {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
+	@TenantId
+	@Column(name = "empresa_id", updatable = false)
+	private Long empresaId;
 
 	@Column(name = "numero_protocolo", length = 15)
 	private String numeroProtocolo;

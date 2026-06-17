@@ -13,6 +13,9 @@ public record AuthRegisterRequestDTO(
 		String email,
 		@NotBlank(message = "Informe a senha.")
 		@Size(min = 6, message = "A senha deve ter pelo menos 6 caracteres.")
-		String senha
+		String senha,
+		// Opcional: código do plano escolhido na landing (normal, profissional,
+		// escritorio). Quando ausente, o trial usa o plano padrão.
+		String planoCodigo
 ) {
 }

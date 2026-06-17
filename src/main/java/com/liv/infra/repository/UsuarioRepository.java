@@ -18,7 +18,13 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
 	boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
 
-	long countByNivelAndAtivoTrue(NivelUsuario nivel);
+	// Métodos com escopo de empresa (tenant): usados na gestão de usuários,
+	// para que um admin só enxergue e altere usuários da própria empresa.
+	List<Usuario> findAllByEmpresaIdOrderByNomeAsc(Long empresaId);
 
-	List<Usuario> findAllByOrderByNomeAsc();
+	long countByEmpresaId(Long empresaId);
+
+	Optional<Usuario> findByIdAndEmpresaId(Long id, Long empresaId);
+
+	long countByEmpresaIdAndNivelAndAtivoTrue(Long empresaId, NivelUsuario nivel);
 }

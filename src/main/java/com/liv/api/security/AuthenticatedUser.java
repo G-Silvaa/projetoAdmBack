@@ -5,6 +5,7 @@ import com.liv.domain.Usuario;
 
 public record AuthenticatedUser(
 		Long id,
+		Long empresaId,
 		String nome,
 		String email,
 		NivelUsuario nivel
@@ -13,6 +14,7 @@ public record AuthenticatedUser(
 	public static AuthenticatedUser fromEntity(Usuario usuario) {
 		return new AuthenticatedUser(
 				usuario.getId(),
+				usuario.getEmpresaId(),
 				usuario.getNome(),
 				usuario.getEmail(),
 				usuario.getNivel()

@@ -15,6 +15,7 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import org.hibernate.annotations.TenantId;
 @Entity
 @Table(name = "representantes")
 public class Representante {
@@ -22,6 +23,10 @@ public class Representante {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
+	@TenantId
+	@Column(name = "empresa_id", updatable = false)
+	private Long empresaId;
 
 	@Valid
 	@Embedded

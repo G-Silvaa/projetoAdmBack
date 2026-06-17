@@ -14,8 +14,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.liv.domain.NivelUsuario;
+import com.liv.domain.SubscriptionService;
 import com.liv.domain.Usuario;
 import com.liv.domain.UsuarioService;
+import com.liv.infra.tenant.TenantContext;
 
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -31,12 +33,20 @@ public class AuthFilter extends OncePerRequestFilter {
 			"/",
 			"/error",
 			"/auth/login",
-			"/auth/register"
+			"/auth/register",
+			"/planos"
 	);
 
 	private static final List<String> PUBLIC_PREFIXES = List.of(
 			"/swagger-ui",
 			"/api-docs"
+	);
+
+	// Endpoints liberados mesmo com a assinatura bloqueada, para o front
+	// conseguir carregar o usuário e exibir a tela de cobrança.
+	private static final List<String> SUBSCRIPTION_BYPASS = List.of(
+			"/auth/me",
+			"/assinatura"
 	);
 
 	private static final List<AccessRule> ACCESS_RULES = List.of(
@@ -189,10 +199,12 @@ public class AuthFilter extends OncePerRequestFilter {
 
 	private final JwtService jwtService;
 	private final UsuarioService usuarioService;
+	private final SubscriptionService subscriptionService;
 
-	public AuthFilter(JwtService jwtService, UsuarioService usuarioService) {
+	public AuthFilter(JwtService jwtService, UsuarioService usuarioService, SubscriptionService subscriptionService) {
 		this.jwtService = jwtService;
 		this.usuarioService = usuarioService;
+		this.subscriptionService = subscriptionService;
 	}
 
 	@Override
@@ -228,7 +240,19 @@ public class AuthFilter extends OncePerRequestFilter {
 			}
 
 			request.setAttribute(AuthContext.REQUEST_ATTRIBUTE, authenticatedUser);
-			filterChain.doFilter(request, response);
+			TenantContext.set(usuario.getEmpresaId());
+			try {
+				// Gate de assinatura: bloqueia o sistema quando a assinatura está
+				// vencida/inativa (exceto endpoints liberados para exibir a cobrança).
+				if (!isSubscriptionBypass(path) && !subscriptionService.permiteAcesso(usuario.getEmpresaId())) {
+					writeError(response, HttpStatus.PAYMENT_REQUIRED,
+							"Sua assinatura está inativa ou vencida. Regularize o pagamento para continuar.");
+					return;
+				}
+				filterChain.doFilter(request, response);
+			} finally {
+				TenantContext.clear();
+			}
 		} catch (JwtException exception) {
 			writeError(response, HttpStatus.UNAUTHORIZED, "Sessão inválida ou expirada.");
 		} catch (ResponseStatusException exception) {
@@ -240,6 +264,10 @@ public class AuthFilter extends OncePerRequestFilter {
 
 	private boolean isPublic(String path) {
 		return PUBLIC_PATHS.contains(path) || PUBLIC_PREFIXES.stream().anyMatch(path::startsWith);
+	}
+
+	private boolean isSubscriptionBypass(String path) {
+		return SUBSCRIPTION_BYPASS.stream().anyMatch(path::startsWith);
 	}
 
 	private boolean isAuthorized(String path, String method, AuthenticatedUser authenticatedUser) {

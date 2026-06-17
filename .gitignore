@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Maven repo local (cache de dependências)
+.mvnrepo/

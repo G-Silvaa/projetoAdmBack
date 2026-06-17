@@ -57,3 +57,17 @@ DB_PORT=5433 ./mvnw spring-boot:run
 - Porta do PostgreSQL no host ao usar Docker Compose: `5433`
 
 As migrations em `src/main/resources/db/migration` são executadas automaticamente pelo Flyway na subida da aplicação.
+
+## Usuários de demonstração
+
+A migration `V11__seed_usuarios.sql` cria um usuário por nível de acesso, vinculados ao escritório padrão (`empresa_id = 1`). A senha de todos é `arctech123`.
+
+| Nível          | E-mail                      | Senha        |
+| -------------- | --------------------------- | ------------ |
+| ADMINISTRADOR  | admin@arctech.com.br        | `arctech123` |
+| GESTOR         | gestor@arctech.com.br       | `arctech123` |
+| OPERADOR       | operador@arctech.com.br     | `arctech123` |
+| FINANCEIRO     | financeiro@arctech.com.br   | `arctech123` |
+| CONSULTA       | consulta@arctech.com.br     | `arctech123` |
+
+> ⚠️ **Segurança:** são contas de **demonstração** com senha conhecida. Antes de ir para produção, troque as senhas ou remova esses acessos.

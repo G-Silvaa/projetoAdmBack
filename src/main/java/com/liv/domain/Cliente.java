@@ -28,16 +28,23 @@ import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import org.hibernate.annotations.TenantId;
 @Entity
 @Table(name = "clientes", uniqueConstraints = {
-		@UniqueConstraint(name = "clientes_uk_cpf", columnNames = "cpf")
+		@UniqueConstraint(name = "clientes_uk_empresa_cpf", columnNames = { "empresa_id", "cpf" })
 })
 public class Cliente {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
+	// Tenant (empresa dona do registro). Gerenciado pelo Hibernate via @TenantId:
+	// preenchido na inserção e filtrado em toda consulta automaticamente.
+	@TenantId
+	@Column(name = "empresa_id", updatable = false)
+	private Long empresaId;
+
 	@Valid
 	@Embedded
 	private Contato contato;
@@ -112,6 +119,10 @@ public class Cliente {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Long getEmpresaId() {
+		return empresaId;
 	}
 
 	public Contato getContato() {
