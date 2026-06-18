@@ -144,13 +144,13 @@ public class RelatorioService {
 
 		report.addFooterGrid().setFontSize(6).setBorder(Borders.None)
 				.addRow()
-				.addValue("LIV Assessoria Previdenciária").sethAlignLeft().setFontBold()
+				.addValue("Arctech Assessoria Previdenciária").sethAlignLeft().setFontBold()
 				.addValue().sethAlignRight()
 				.addRow()
-				.addValue("Avenida 4 de julho, Av. Carlos Jereissati, 387").sethAlignLeft()
+				.addValue("Rua Exemplo, nº 100, Centro").sethAlignLeft()
 				.addValue()
 				.addRow()
-				.addValue("CEP: 61.901.080 | Maracanaú, CE").sethAlignLeft()
+				.addValue("CEP: 00000-000 | Cidade, UF").sethAlignLeft()
 				.addValue("Emitido em " + new Date().toString()).sethAlignRight();
 
 		report.setPageHeight(595f);

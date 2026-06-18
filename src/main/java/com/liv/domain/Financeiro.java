@@ -158,7 +158,7 @@ public class Financeiro {
 			.setFontSize(12).setPaddings(0, 60, 0, 60).sethAlignJustified()
 			.addRow().addValue("\n\n\n\n\n_____________________________________________________").sethAlignCenter()
 			.addRow()
-			.addValue("Atenciosamente, LIV Assessoria Previdenciária").sethAlignCenter();
+			.addValue("Atenciosamente, Arctech Assessoria Previdenciária").sethAlignCenter();
 		} else {
 			report.addGrid().setBorder(Borders.None)
 			.addRow()
@@ -171,7 +171,7 @@ public class Financeiro {
 			.setFontSize(12).setPaddings(0, 60, 0, 60).sethAlignJustified()
 			.addRow().addValue("\n\n\n\n\n_____________________________________________________").sethAlignCenter()
 			.addRow()
-			.addValue("Atenciosamente, LIV Assessoria Previdenciária").sethAlignCenter();
+			.addValue("Atenciosamente, Arctech Assessoria Previdenciária").sethAlignCenter();
 		}
 
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {

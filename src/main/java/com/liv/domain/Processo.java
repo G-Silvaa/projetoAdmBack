@@ -359,9 +359,9 @@ public class Processo {
 
 	    report.addGrid().setBorder(Borders.None)
 	            .addRow()
-	            .addValue("\n\n\n\n\n\n\n\n\n\n\n\n\n\nMaracanaú/CE").setPaddings(0, 60, 0, 60)
+	            .addValue("\n\n\n\n\n\n\n\n\n\n\n\n\n\nCidade/UF").setPaddings(0, 60, 0, 60)
 	            .addRow()
-	            .addValue("\n\nPrezado(a), " + nomeCliente + ". O escritório LIV Assessoria Previdenciária, vem por este meio informar")
+	            .addValue("\n\nPrezado(a), " + nomeCliente + ". O escritório Arctech Assessoria Previdenciária, vem por este meio informar")
 	            .setPaddings(0, 60, 0, 60).sethAlignJustified()
 	            .addRow()
 	            .addValue("\n\nPERÍCIA MÉDICA MARCADA PARA O DIA: " + dataFormatada + ", NO ENDEREÇO " + endereco + ".")
@@ -373,10 +373,10 @@ public class Processo {
 	            .addValue("\n\n\n\n\"EM CASO DE AUSÊNCIA, ENTRAR EM CONTATO COM 3 DIAS DE ANTECEDÊNCIA\"")
 	            .sethAlignCenter()
 	            .addRow()
-	            .addValue("\n\n\nDemais esclarecimentos, entrar em contato pelo telefone (85) 98628-5349")
+	            .addValue("\n\n\nDemais esclarecimentos, entrar em contato pelo telefone (00) 0000-0000")
 	            .sethAlignCenter()
 	            .addRow()
-	            .addValue("\n\nAtenciosamente, LIV Assessoria Previdenciária").sethAlignCenter();
+	            .addValue("\n\nAtenciosamente, Arctech Assessoria Previdenciária").sethAlignCenter();
 
 	    try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 	        ReportExporterPDF.exportTo(report, baos);
@@ -410,10 +410,10 @@ public class Processo {
 	    String endereco = enderecoAvaliacaoSocial.toUpperCase();
 
 	    report.addGrid().setBorder(Borders.None).addRow()
-	            .addValue("\n\n\n\n\n\n\n\n\n\n\n\n\n\nMaracanaú/CE")
+	            .addValue("\n\n\n\n\n\n\n\n\n\n\n\n\n\nCidade/UF")
 	            .setPaddings(0, 60, 0, 60)
 	            .addRow()
-	            .addValue("\n\nPrezado(a), " + nomeCliente + ". O escritório LIV Assessoria Previdenciária, vem por este meio informar")
+	            .addValue("\n\nPrezado(a), " + nomeCliente + ". O escritório Arctech Assessoria Previdenciária, vem por este meio informar")
 	            .setPaddings(0, 60, 0, 60).sethAlignJustified()
 	            .addRow()
 	            .addValue("\n\nAVALIAÇÃO SOCIAL MARCADA PARA O DIA: " + dataFormatada + ", NO ENDEREÇO " + endereco + ".")
@@ -425,10 +425,10 @@ public class Processo {
 	            .addValue("\n\n\n\n\"EM CASO DE AUSÊNCIA, ENTRAR EM CONTATO COM 3 DIAS DE ANTECEDÊNCIA\"")
 	            .sethAlignCenter()
 	            .addRow()
-	            .addValue("\n\n\nDemais esclarecimentos, entrar em contato pelo telefone (85) 98628-5349")
+	            .addValue("\n\n\nDemais esclarecimentos, entrar em contato pelo telefone (00) 0000-0000")
 	            .sethAlignCenter()
 	            .addRow()
-	            .addValue("\n\nAtenciosamente, LIV Assessoria Previdenciária").sethAlignCenter();
+	            .addValue("\n\nAtenciosamente, Arctech Assessoria Previdenciária").sethAlignCenter();
 
 	    try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 	        ReportExporterPDF.exportTo(report, baos);
@@ -463,7 +463,7 @@ public class Processo {
 	        .setPaddings(0, 60, 0, 60)
 	        .addRow().addValue(detalhesConcessao).setPaddings(0, 60, 0, 60).sethAlignJustified()
 	        .addRow().addValue("\n\n\n\n\n_____________________________________________________").sethAlignCenter()
-	        .addRow().addValue("LIV Assessoria Previdenciária").sethAlignCenter();
+	        .addRow().addValue("Arctech Assessoria Previdenciária").sethAlignCenter();
 
 	    try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 	        ReportExporterPDF.exportTo(report, baos);

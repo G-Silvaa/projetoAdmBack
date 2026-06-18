@@ -18,8 +18,8 @@ public class OpenApiConfig {
 		String version = buildProperties != null ? buildProperties.getVersion() : "local";
 
 		return new OpenAPI().info(new Info()
-				.title("LIV API")
-				.description("API de gestão da LIV Assessoria Previdenciária")
+				.title("Arctech API")
+				.description("API de gestão da Arctech Assessoria Previdenciária")
 				.version(version)
 				.license(new License().name("Uso interno")));
 	}
