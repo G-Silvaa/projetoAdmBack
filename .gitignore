@@ -1,0 +1,34 @@
+# ===== backend (Maven / Spring Boot) =====
+backend/target/
+backend/.mvnrepo/
+backend/HELP.md
+
+# ===== frontend (Next.js / Node) =====
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.vercel/
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+
+# ===== env =====
+.env
+.env.*.local
+**/.env
+**/.env.*.local
+
+# ===== IDE / OS =====
+.idea/
+.vscode/
+.settings/
+.project
+.classpath
+*.iml
+.DS_Store
+*.pem
+
+# ===== logs =====
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

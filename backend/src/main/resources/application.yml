@@ -1,0 +1,55 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: liv-api
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:liv}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: liv
+        order_updates: true
+        jdbc.batch_size: 1000
+        connection.charSet: UTF-8        
+        jdbc.lob.non_contextual_creation: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect 
+  flyway:
+    enabled: true
+    default-schema: liv
+    schemas: liv
+    create-schemas: true
+    init-sqls: CREATE SCHEMA IF NOT EXISTS liv;
+    locations: classpath:db/migration
+  jackson:
+    deserialization.fail-on-unknown-properties: true
+    deserialization.fail-on-ignored-properties: false
+  logging:
+    level.org.springframework: INFO
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+server:
+  servlet.context-path: /liv-api
+app:
+  auth:
+    jwt-secret: ${APP_JWT_SECRET:liv-api-jwt-secret-longa-o-suficiente-para-hmac-256-e-rotacao}
+    jwt-expiration-ms: ${APP_JWT_EXPIRATION_MS:28800000}
+  abacatepay:
+    # Sem api-key o pagamento roda em MODO MOCK (QR gerado localmente, confirmação
+    # via simulação). Use uma chave dev (abc_dev_...) para o sandbox real.
+    base-url: ${ABACATEPAY_BASE_URL:https://api.abacatepay.com/v1}
+    api-key: ${ABACATEPAY_API_KEY:}
+    webhook-secret: ${ABACATEPAY_WEBHOOK_SECRET:}
+    expires-in-seconds: ${ABACATEPAY_EXPIRES_IN:3600}

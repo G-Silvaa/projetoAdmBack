@@ -1,0 +1,63 @@
+# ============================================================================
+# Stack completa do Arctech: banco + API (Spring Boot) + front (Next.js).
+# Sobe tudo com:  docker compose up --build
+#   - Front:   http://localhost:3000
+#   - API:     http://localhost:8080/liv-api
+#   - Swagger: http://localhost:8080/liv-api/swagger-ui.html
+# O banco já é populado automaticamente (Flyway) com o seed de demonstração.
+# ============================================================================
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: arctech-db
+    environment:
+      POSTGRES_DB: liv
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "${DB_EXTERNAL_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d liv"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    container_name: arctech-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: liv
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      # AbacatePay: vazio = modo mock/sandbox local. Preencha no host para usar o real.
+      ABACATEPAY_API_KEY: ${ABACATEPAY_API_KEY:-}
+      ABACATEPAY_WEBHOOK_SECRET: ${ABACATEPAY_WEBHOOK_SECRET:-}
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # URL que o BROWSER usa para falar com a API (precisa ser acessível do host).
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080/liv-api/}
+    container_name: arctech-frontend
+    depends_on:
+      - backend
+    environment:
+      # URL server-side (container -> container), caso seja usada.
+      API_URL: http://backend:8080/liv-api/
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:
