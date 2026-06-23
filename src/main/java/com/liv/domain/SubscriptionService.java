@@ -98,6 +98,30 @@ public class SubscriptionService {
 		);
 	}
 
+	/** Dias de acesso liberados a cada pagamento confirmado. */
+	public static final int CICLO_DIAS = 30;
+
+	/**
+	 * Confirma o pagamento de uma assinatura: marca como ATIVA e estende o
+	 * vencimento em um ciclo. Se ainda houver saldo (vencimento futuro), o ciclo
+	 * é somado a partir do vencimento atual; caso contrário, a partir de hoje.
+	 */
+	@Transactional
+	public Assinatura ativarAssinaturaPaga(Long empresaId) {
+		Assinatura assinatura = getAssinatura(empresaId);
+		Date hoje = new Date();
+		Date base = (assinatura.getVencimento() != null && assinatura.getVencimento().after(hoje))
+				? assinatura.getVencimento()
+				: hoje;
+
+		assinatura.setStatus(StatusAssinatura.ATIVA);
+		assinatura.setVencimento(somarDias(base, CICLO_DIAS));
+		if (assinatura.getInicio() == null) {
+			assinatura.setInicio(hoje);
+		}
+		return assinaturaRepository.save(assinatura);
+	}
+
 	/** Lista os planos ativos (usado na landing/escolha de plano). */
 	@Transactional(readOnly = true)
 	public List<PlanoResponseDTO> listarPlanos() {

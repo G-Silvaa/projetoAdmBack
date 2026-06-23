@@ -46,3 +46,10 @@ app:
   auth:
     jwt-secret: ${APP_JWT_SECRET:liv-api-jwt-secret-longa-o-suficiente-para-hmac-256-e-rotacao}
     jwt-expiration-ms: ${APP_JWT_EXPIRATION_MS:28800000}
+  abacatepay:
+    # Sem api-key o pagamento roda em MODO MOCK (QR gerado localmente, confirmação
+    # via simulação). Use uma chave dev (abc_dev_...) para o sandbox real.
+    base-url: ${ABACATEPAY_BASE_URL:https://api.abacatepay.com/v1}
+    api-key: ${ABACATEPAY_API_KEY:}
+    webhook-secret: ${ABACATEPAY_WEBHOOK_SECRET:}
+    expires-in-seconds: ${ABACATEPAY_EXPIRES_IN:3600}

@@ -39,7 +39,8 @@ public class AuthFilter extends OncePerRequestFilter {
 
 	private static final List<String> PUBLIC_PREFIXES = List.of(
 			"/swagger-ui",
-			"/api-docs"
+			"/api-docs",
+			"/assinatura/webhook"
 	);
 
 	// Endpoints liberados mesmo com a assinatura bloqueada, para o front
@@ -50,6 +51,16 @@ public class AuthFilter extends OncePerRequestFilter {
 	);
 
 	private static final List<AccessRule> ACCESS_RULES = List.of(
+			new AccessRule(
+					List.of("/assinatura/pagamento"),
+					List.of(),
+					List.of(HttpMethod.GET, HttpMethod.POST),
+					List.of(
+							NivelUsuario.ADMINISTRADOR,
+							NivelUsuario.GESTOR,
+							NivelUsuario.FINANCEIRO
+					)
+			),
 			new AccessRule(
 					List.of("/usuarios", "/domain/usuario"),
 					List.of(),
